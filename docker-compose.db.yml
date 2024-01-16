@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   db:
-    image: mongo
+    image: mongo:latst
     container_name: test-mongo
     restart: always
     ports:
@@ -10,7 +10,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=administrator
       - MONGO_INITDB_ROOT_PASSWORD=Coop1234
   db-client:
-    image: mongo-express
+    image: mongo-express:latst
     restart: always
     ports:
       - 8081:8081
