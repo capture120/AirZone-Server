@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 const CONNECTION_STRING = process.env.DB_CONNECTION_STRING as string;
 mongoose.connect(CONNECTION_STRING);
 
-
 const app = express(); 
 
 app.use(cors({

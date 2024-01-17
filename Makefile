@@ -1,6 +1,10 @@
-# Run Backend Server
+# Run Backend Server and Database
 .PHONY: backend-dev
-backend-dev: db-dev
+backend-dev: db-dev backend-server
+
+# Run Backend Server
+.PHONY: backend-server
+backend-server: 
 	nodemon --exec ts-node --esm ./src/app.ts
 
 # Start Database
