@@ -1,6 +1,6 @@
 import { Schema, Types } from "mongoose";
 
-import locationSchema, { Location } from "../location/location-schema";
+import { Location } from "../location/location-schema";
 
 export interface User {
     _id: Types.ObjectId,
@@ -12,7 +12,7 @@ export interface User {
 const userSchema = new Schema<User>({
     username: {type: String, unique: true},
     password: {type: String},
-    savedLocations: [locationSchema],
+    savedLocations: [ { type: Types.ObjectId, ref: "location" } ],
 }, { collection: 'user'});
 
 export default userSchema;

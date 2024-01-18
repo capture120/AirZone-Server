@@ -1,6 +1,8 @@
 # Run Backend Server and Database
 .PHONY: backend-dev
-backend-dev: db-dev backend-server
+backend-dev: db-dev
+	npm i
+	make backend-server
 
 # Run Backend Server
 .PHONY: backend-server
