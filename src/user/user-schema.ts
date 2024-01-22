@@ -1,12 +1,10 @@
 import { Schema, Types } from "mongoose";
 
-import { Location } from "../location/location-schema";
-
 export interface User {
     _id: Types.ObjectId,
     username: String,
     password: String,
-    savedLocations: Types.Array<Location>
+    savedLocations: Types.ObjectId[] // Array<Location>
 }
 
 const userSchema = new Schema<User>({
