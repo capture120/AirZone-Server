@@ -5,15 +5,8 @@ import * as locationDao from '../location/location-doa';
 import { Location } from '../location/location-schema';
 import crypto from 'crypto';
 
-
-function generateToken() {
-  return crypto.randomBytes(64).toString('hex');
-}
-
 function validateToken(req: Request, res: Response, next: NextFunction) {
-    const csrfToken = req.headers['x-csrf-token'];
-    console.log(JSON.stringify(req.headers))
-    console.log(`in validateToken function\n Session csrf token ${req.session.csrfToken} | header csrf token ${csrfToken}`);
+    const csrfToken = req.headers['csrfToken'];
     if (req.session.csrfToken === csrfToken) {
       next();
     } else {
@@ -40,9 +33,9 @@ const UserController = (app: Express) => {
 
     app.get('/api/user/authenticate', authenticate);
     
-    app.put('/api/user/saveLocation', validateToken, saveLocation);
+    app.put('/api/user/saveLocation', saveLocation);
 
-    app.get('/api/user/details', validateToken, getDetails);
+    app.get('/api/user/details', getDetails);
 }
 
 const registerUser = async (req: Request, res: Response) => {
@@ -50,13 +43,12 @@ const registerUser = async (req: Request, res: Response) => {
     const existingUser = await userDao.findByUsername(newUserDetails.username);
 
     if (existingUser) {
+        resetSession(req);
         res.sendStatus(409);
     } else {
         const newUser: User = await userDao.createUser({...newUserDetails});
         if (newUser) {
             req.session.user = newUser;
-            req.session.csrfToken = generateToken();
-            res.setHeader('Set-Cookie', `csrfToken=${req.session.csrfToken}; HttpOnly; Secure; SameSite=Strict`);
             res.json(newUser)
         } else {
             resetSession(req);
@@ -76,11 +68,8 @@ const signin = async (req: Request, res: Response) => {
 
     const user: User | null = await userDao.findByUsernamePassword(username, password);
     if (user) {
-        console.log('##################################################################')
         req.session.user = user;
-        req.session.csrfToken = generateToken();
         res.json(user);
-        // console.log(res.headersSent);
     } else {
         resetSession(req);
         res.sendStatus(404);
@@ -90,18 +79,13 @@ const signin = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
     req.session.user = null;
-    req.session.csrfToken = null;
-
-    res.setHeader('Set-Cookie', 'csrfToken=; HttpOnly; Secure; SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
     res.sendStatus(200);
 }
 
 const authenticate = (req: Request, res: Response) => {
-    const csrfToken = req.headers['x-csrf-token'];
-    if (req.session.csrfToken === csrfToken) {
+    if (req.session.user) {
         res.sendStatus(200);
     } else {
-        resetSession(req);
         res.sendStatus(403);
     }
 }
@@ -111,7 +95,7 @@ const authenticate = (req: Request, res: Response) => {
 const saveLocation = async (req: Request, res: Response) => {
     const locationDetails = req.body as Location;
     if (!req.session.user) {
-        res.sendStatus(409);
+        res.status(403).send('User not logged in');
         return;
     }
 
@@ -140,13 +124,13 @@ const getDetails = async (req: Request, res: Response) => {
         const userDetails = await userDao.findUserLocations(req.session.user._id);
         res.json(userDetails)
     } else {
-        res.sendStatus(403);
+        resetSession(req);
+        res.status(403).send('User not logged in');
     }
 }
 
 function resetSession(req: Request) {
     req.session.user = null;
-    req.session.csrfToken = null;
 }
 
 export default UserController;

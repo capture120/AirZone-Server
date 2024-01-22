@@ -26,9 +26,6 @@ const sessionOptions: session.SessionOptions = {
     cookie: {
         // expiration time set to 30 minutes
         maxAge: 30 * 24 * 60 * 1000,
-        secure: true,
-        sameSite: 'strict',
-        httpOnly: true,
     },
 };
 
