@@ -3,7 +3,7 @@ import { User } from './user-schema';
 import * as userDao from './user-dao';
 import * as locationDao from '../location/location-doa';
 import { Location } from '../location/location-schema';
-import crypto from 'crypto';
+import { Types } from 'mongoose';
 
 function validateToken(req: Request, res: Response, next: NextFunction) {
     const csrfToken = req.headers['csrfToken'];
@@ -36,6 +36,22 @@ const UserController = (app: Express) => {
     app.put('/api/user/saveLocation', saveLocation);
 
     app.get('/api/user/details', getDetails);
+
+    app.delete('/api/user/removeLocation/:id', removeLocation);
+}
+
+const removeLocation = async (req: Request, res: Response) => {
+    if (!req.session.user) {
+        res.status(403).send('User not logged in');
+        return;
+    }
+    const locationId = new Types.ObjectId(req.params.id);
+    const updatedUser = await userDao.removeLocation(req.session.user._id, locationId);
+    if (!updatedUser) {
+        res.status(500).send('Internal Server Error');
+        return;
+    }
+    res.json(updatedUser);
 }
 
 const registerUser = async (req: Request, res: Response) => {
@@ -72,7 +88,7 @@ const signin = async (req: Request, res: Response) => {
         res.json(user);
     } else {
         resetSession(req);
-        res.sendStatus(404);
+        res.sendStatus(401);
     }
 
 }

@@ -5,6 +5,7 @@ import session from "express-session";
 import mongoose from "mongoose";
 
 import UserController from './user/user-controller';
+import LocationController from './location/location-controller';
 
 /* connecting to local mongodb database */
 const CONNECTION_STRING = process.env.DB_CONNECTION_STRING as string;
@@ -43,6 +44,7 @@ app.use(function(req, res, next) {
   
 /* Register Routes */
 UserController(app);
+LocationController(app);
 app.get('/api/healthcheck', (req, res) => res.sendStatus(200));
 
 app.listen(process.env.PORT || 4000);

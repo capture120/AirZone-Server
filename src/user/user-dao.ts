@@ -20,3 +20,8 @@ export const createUser = async (user: User) => (await userModel.create(user)).$
 export const saveLocation = (userId: Types.ObjectId, location: Types.ObjectId) => 
             userModel.findOneAndUpdate({_id: userId}, { $push: { savedLocations: location } }, {new: true})
             .select("-password");
+
+// Remove Location
+export const removeLocation = (userId: Types.ObjectId, locationId: Types.ObjectId) => 
+            userModel.findOneAndUpdate({_id: userId}, { $pull: { savedLocations: locationId } }, {new: true})
+            .select("-password");
